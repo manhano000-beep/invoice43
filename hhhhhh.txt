@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>فاتورة</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #f4f4f4;
+    padding: 20px;
+}
+
+.container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+h1 {
+    text-align: center;
+}
+
+input {
+    padding: 6px;
+    margin: 5px 0;
+    width: 100%;
+}
+
+label {
+    font-weight: bold;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table, th, td {
+    border: 1px solid #ccc;
+}
+
+th, td {
+    padding: 10px;
+    text-align: center;
+}
+
+button {
+    padding: 10px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.total {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+@media print {
+    input, button {
+        display: none;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>فاتورة</h1>
+
+<!-- بيانات إضافية -->
+<div>
+    <label>اسم المؤسسة (اختياري)</label>
+    <input type="text" id="companyName">
+
+    <label>اسم المخلص (اختياري)</label>
+    <input type="text" id="agentName">
+</div>
+
+<!-- عرض البيانات -->
+<div id="extraData"></div>
+
+<hr>
+
+<h3>إضافة منتج</h3>
+
+<input type="text" id="item" placeholder="اسم المنتج">
+<input type="number" id="price" placeholder="السعر">
+<input type="number" id="qty" placeholder="الكمية">
+
+<button onclick="addItem()">إضافة</button>
+
+<table>
+    <thead>
+        <tr>
+            <th>المنتج</th>
+            <th>السعر</th>
+            <th>الكمية</th>
+            <th>الإجمالي</th>
+        </tr>
+    </thead>
+    <tbody id="invoiceBody"></tbody>
+</table>
+
+<div class="total">
+    الإجمالي: <span id="total">0</span> ريال
+</div>
+
+<button onclick="printInvoice()">طباعة / PDF</button>
+
+</div>
+
+<script>
+let total = 0;
+
+// إضافة منتج
+function addItem() {
+    let item = document.getElementById("item").value;
+    let price = parseFloat(document.getElementById("price").value);
+    let qty = parseFloat(document.getElementById("qty").value);
+
+    if (!item || !price || !qty) {
+        alert("أدخل كل البيانات");
+        return;
+    }
+
+    let sum = price * qty;
+    total += sum;
+
+    let row = `
+        <tr>
+            <td>${item}</td>
+            <td>${price}</td>
+            <td>${qty}</td>
+            <td>${sum}</td>
+        </tr>
+    `;
+
+    document.getElementById("invoiceBody").innerHTML += row;
+    document.getElementById("total").innerText = total;
+
+    document.getElementById("item").value = "";
+    document.getElementById("price").value = "";
+    document.getElementById("qty").value = "";
+}
+
+// طباعة
+function printInvoice() {
+    updateExtraData();
+    window.print();
+}
+
+// تحديث البيانات الاختيارية
+function updateExtraData() {
+    let company = document.getElementById("companyName").value.trim();
+    let agent = document.getElementById("agentName").value.trim();
+
+    let html = "";
+
+    if (company !== "") {
+        html += "<p><strong>اسم المؤسسة:</strong> " + company + "</p>";
+    }
+
+    if (agent !== "") {
+        html += "<p><strong>اسم المخلص:</strong> " + agent + "</p>";
+    }
+
+    document.getElementById("extraData").innerHTML = html;
+}
+
+// تحديث مباشر أثناء الكتابة
+document.getElementById("companyName").addEventListener("input", updateExtraData);
+document.getElementById("agentName").addEventListener("input", updateExtraData);
+
+// قبل الطباعة
+window.onbeforeprint = updateExtraData;
+</script>
+
+</body>
+</html>
